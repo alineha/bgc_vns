@@ -1,8 +1,12 @@
+using JuMP
+using GLPK
+
 struct Instance
     v :: Int64 # Number of nodes
     E          # Array of tuples representing the edges
     k :: Int64 # Number of colours
     W          # Weight of each node
+
     function Instance(filepath)
         open(filepath) do file
 
@@ -16,7 +20,7 @@ struct Instance
             line = split(readline(file)," ")
             W = zeros(v)
             for i=1:v
-                W = parse(Float64,line[i])
+                W[i] = parse(Float64,line[i])
             end
 
             ##### REMAINING LINES #####
@@ -26,6 +30,8 @@ struct Instance
                 line = split(lines[i], " ")
                 E[i]=(parse(Int64,line[1])+1,parse(Int64,line[2])+1) # Adds 1 to compensate the fact that Julia starts arrays in 1
             end
+
+            # Initializes the structure
             new(v,E,k,W)
         end
     end
@@ -37,8 +43,37 @@ struct Solution
     X
     C
     m :: Int64
-    function Solution(Instance)
-        
+    function Solution(instance)
+        X = zeros(instance.v,instance.k)
+        C = zeros(instance.k)
+        k = instance.k
+        K = collect(1:k)
+        v = instance.v
+        V = collect(1:v)
+
+        model = Model(GLPK.Optimizer)
+        @variable(model, 0 <= m)
+        @variable(model, X[V,K], Bin)
+        @variable(model, 0 <= C[K])
+        @objective(model, Min, m)
+        for i in V
+            @constraint(model, sum(X[i,a] for a in K)==1)
+        end
+        for a in K
+            @constraint(model, sum(X[i,a]*instance.W[i] for i in V)==C[a])
+            @constraint(model, m>=C[a])
+        end
+        for (i,j) in instance.E
+            for a in K
+                @constraint(model,X[i,a]+X[j,a]<=1)
+            end
+        end
+        println(model)
+        print("Solving...")
+        solve(model)
+        println("Ok.")
     end
 end
+
+Solution(inst)
 
