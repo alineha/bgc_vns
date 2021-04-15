@@ -37,7 +37,7 @@ struct Instance
     end
 end
 
-inst = Instance("D:/Documents/workspace/git/bgc_vns/instances/cmb01")
+inst = Instance("instances/cmb01")
 
 struct Solution
     X
