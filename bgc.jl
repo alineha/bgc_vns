@@ -1,5 +1,4 @@
-using JuMP
-using CPLEX
+using JuMP, Gurobi
 
 struct Instance
     v :: Int64 # Number of nodes
@@ -38,7 +37,7 @@ struct Instance
     end
 end
 
-inst = Instance("instances/cmb01")
+inst = Instance("D:/Documents/workspace/git/bgc_vns/instances/cmb01")
 
 struct Solution
     X
@@ -52,7 +51,7 @@ struct Solution
         v = instance.v
         V = collect(1:v)
 
-        model = Model(CPLEX.Optimizer)
+        model = Model(Gurobi.Optimizer)
         @variable(model, 0 <= m)
         @variable(model, X[V,K], Bin)
         @variable(model, 0 <= C[K])
