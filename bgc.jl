@@ -25,12 +25,13 @@ struct Instance
 
             ##### REMAINING LINES #####
             lines = readlines(file)
-            E = Array{Tuple{Int, Int}}(undef, first(size(lines)))
+            E = Array{Tuple{Int, Int}}(undef, numEdges)
             for i=1:numEdges
-                line = split(lines[i], " ")
-                E[i]=(parse(Int64,line[1])+1,parse(Int64,line[2])+1) # Adds 1 to compensate the fact that Julia starts arrays in 1
+                if(line != "" && line != " ")
+                    line = split(lines[i], " ")
+                    E[i]=(parse(Int64,line[1])+1,parse(Int64,line[2])+1) # Adds 1 to compensate the fact that Julia starts arrays in 1
+                end
             end
-
             # Initializes the structure
             new(v,E,k,W)
         end
@@ -63,14 +64,16 @@ struct Solution
             @constraint(model, sum(X[i,a]*instance.W[i] for i in V)==C[a])
             @constraint(model, m>=C[a])
         end
-        for (i,j) in instance.E
+        for edge in instance.E
+            i = edge[1]
+            j = edge[2]
             for a in K
                 @constraint(model,X[i,a]+X[j,a]<=1)
             end
         end
-        println(model)
+        #println(model)
         print("Solving...")
-        solve(model)
+        optimize!(model)
         println("Ok.")
     end
 end
