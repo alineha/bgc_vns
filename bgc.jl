@@ -1,5 +1,5 @@
 using JuMP
-using GLPK
+using CPLEX
 
 struct Instance
     v :: Int64 # Number of nodes
@@ -52,7 +52,7 @@ struct Solution
         v = instance.v
         V = collect(1:v)
 
-        model = Model(GLPK.Optimizer)
+        model = Model(CPLEX.Optimizer)
         @variable(model, 0 <= m)
         @variable(model, X[V,K], Bin)
         @variable(model, 0 <= C[K])
