@@ -1,5 +1,7 @@
 using JuMP, Gurobi
 
+test = "cmb04"
+
 struct Instance
     v :: Int64 # Number of nodes
     E          # Array of tuples representing the edges
@@ -37,7 +39,7 @@ struct Instance
     end
 end
 
-inst = Instance("instances/cmb01")
+inst = Instance(string("/instances/", test))
 
 struct Solution
     X
@@ -52,6 +54,7 @@ struct Solution
         V = collect(1:v)
 
         model = Model(Gurobi.Optimizer)
+        set_optimizer_attribute(model, "LogFile", string("/logs", test, " log.txt"))
         @variable(model, 0 <= m)
         @variable(model, X[V,K], Bin)
         @variable(model, 0 <= C[K])
