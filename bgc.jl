@@ -39,7 +39,7 @@ struct Instance
     end
 end
 
-inst = Instance(string("/instances/", test))
+inst = Instance(string("instances/", test))
 
 struct Solution
     X
@@ -54,7 +54,7 @@ struct Solution
         V = collect(1:v)
 
         model = Model(Gurobi.Optimizer)
-        set_optimizer_attribute(model, "LogFile", string("/logs/", test, " log.txt"))
+        set_optimizer_attribute(model, "LogFile", string(test, " log.txt"))
         @variable(model, 0 <= m)
         @variable(model, X[V,K], Bin)
         @variable(model, 0 <= C[K])
