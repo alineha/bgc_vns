@@ -1,6 +1,6 @@
 using JuMP, Gurobi
 
-test = "cmb04"
+test = "cmb05"
 
 struct Instance
     v :: Int64 # Number of nodes
@@ -41,11 +41,11 @@ end
 
 inst = Instance(string("instances/", test))
 
-struct Solution
+struct SolverSolution
     X
     C
     m :: Int64
-    function Solution(instance)
+    function SolverSolution(instance)
         X = zeros(instance.v,instance.k)
         C = zeros(instance.k)
         k = instance.k
@@ -73,12 +73,11 @@ struct Solution
                 @constraint(model,X[i,a]+X[j,a]<=1)
             end
         end
-        #println(model)
-        print("Solving...")
+        print("Model complete. Solving...")
         optimize!(model)
-        println("Ok.")
+        println("Solved.")
     end
 end
 
-Solution(inst)
+SolverSolution(inst)
 
