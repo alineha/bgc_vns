@@ -27,7 +27,7 @@ class Vertex():
                 colours[colouring[v]]+=1
         return colours
 
-    def check_total_conflicts(self,colouring,k,get_list_of_conflicts=False):
+    def check_total_conflicts(self,colouring,get_list_of_conflicts=False):
         num_conflicts = 0
         conflicts = []
         for v in self.adj:
