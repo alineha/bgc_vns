@@ -191,9 +191,10 @@ def random_neighbour4(graph, solution):
 # The conflict correction neighbourhood - if the algorithm got to this one, it means there is a need to lessen the number of conflicts
 # Changes a random vertex to the colour that would give it the least number of conflicts
 def random_neighbour5(graph, solution):
-    v = random.randrange(0,floor(len(graph.vertexes)-1))
-
     new_solution = copy.deepcopy(solution)
+
+    #for i in range(0, 9):
+    v = random.randrange(0,floor(len(graph.vertexes)-1))
     conflicts = graph.vertexes[v].check_conflicts(new_solution.colouring,graph.colours)
     new_solution.modify_colour(v,graph.vertexes[v].weight, min(zip(conflicts, range(len(conflicts))))[1])
     return new_solution
@@ -232,24 +233,24 @@ def VNS(graph):
             s2 = local_search(k,s1,graph)
             if s2.evaluate(graph)<s.evaluate(graph):
                 print(s2.evaluate(graph))
-                s = s2
+                s = copy.deepcopy(s2)
                 k = 1
             else:
                 k = k+1
-        iterations+=1
-        iterations_result.append(s)
+            iterations+=1
+            iterations_result.append(s.evaluate(graph))
 
     plt.figure(figsize=(10, 6))     
     plt.scatter(list(range(0, iterations)), iterations_result)
     plt.xlabel('Iterations')
     plt.ylabel('Solution')
-    plt.title('Dados')
+    plt.title(f'{INSTANCE} - SEED: {SEED}')
     plt.show()
 
     return s
 
 #D:\\Documents\\workspace\\git\\bgc_vns\\
-g = read_file("D:\\Documents\\workspace\\git\\bgc_vns\instances\\cmb05")
+g = read_file(f"D:\\Documents\\workspace\\git\\bgc_vns\instances\\{INSTANCE}")
 solution = initial_solution(g)
 VNS(g)
 
