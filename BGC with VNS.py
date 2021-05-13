@@ -11,8 +11,9 @@ SEED = 21938273
 random.seed(SEED)
 CONFLICT_WEIGHT = 10000
 MAX_ITERATIONS = 1000
-MAX_TIME = 10800
+MAX_TIME = 3600
 PARTITIONS = 4
+INSTANCE = 'cmb01'
 
 class Solution():
     def __init__(self, colouring, graph):
@@ -244,13 +245,13 @@ def VNS(graph):
     plt.scatter(list(range(0, iterations)), iterations_result)
     plt.xlabel('Iterations')
     plt.ylabel('Solution')
-    plt.title(f'{INSTANCE} - SEED: {SEED}')
+    plt.title(f'{INSTANCE} - SEED: {SEED} - TIME: {time.time() - start_time}')
     plt.show()
 
     return s
 
 #D:\\Documents\\workspace\\git\\bgc_vns\\
-g = read_file(f"D:\\Documents\\workspace\\git\\bgc_vns\instances\\{INSTANCE}")
+g = read_file(f"..\instances\\{INSTANCE}")
 solution = initial_solution(g)
 VNS(g)
 
