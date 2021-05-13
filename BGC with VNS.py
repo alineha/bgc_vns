@@ -222,14 +222,15 @@ def local_search(k, solution, graph):
 
 def VNS(graph):
     start_time = time.time()
+    current_time = 0
     s = initial_solution(graph)
     iterations = 0
     
     iterations_result = []
 
-    while not time_to_stop(time.time() - start_time,iterations):
+    while not time_to_stop(current_time,iterations):
         k = 1
-        while k <= 4:
+        while k <= 4 and not time_to_stop(current_time,iterations):
             s1 = random_neighbour(graph,s,k)
             s2 = local_search(k,s1,graph)
             if s2.evaluate(graph)<s.evaluate(graph):
@@ -241,6 +242,8 @@ def VNS(graph):
                 k = k+1
             iterations+=1
             iterations_result.append(s.evaluate(graph))
+            current_time = time.time()-start_time
+            print(current_time)
 
     print(s.evaluate(graph))
 
@@ -248,7 +251,7 @@ def VNS(graph):
     plt.scatter(list(range(0, iterations)), iterations_result)
     plt.xlabel('Iterations')
     plt.ylabel('Solution')
-    plt.title(f'{INSTANCE} - SEED: {SEED} - TIME: {time.time() - start_time}')
+    plt.title(f'{INSTANCE} - SEED: {SEED} - TIME: {current_time}')
     plt.show()
 
     return s
