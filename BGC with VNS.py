@@ -32,12 +32,10 @@ class Solution():
         self.colour_weights = []
         for colour in range(0, graph.colours):
             self.colour_weights.append((colour, 0))
-            print(self.colour_weights)
             self.vertexes_by_colour.append([])
 
     def evaluate(self,graph):
         conflicts = graph.number_of_conflicts(self.colouring)
-        print(f"{conflicts} conflicts")
         WEIGHT_INDEX_TUPLE = 1
         max_colour_weight = sorted(self.colour_weights, key = lambda x: x[1], reverse=True)[0][WEIGHT_INDEX_TUPLE]
         return max_colour_weight + conflicts * CONFLICT_WEIGHT
@@ -108,8 +106,6 @@ def balance_colours(graph, solution, greater_colour, lesser_colour, is_random):
 
     solution.modify_colour(recoloured_vertex,recoloured_vertex_weight,lesser_colour)
 
-    print(f'[{recoloured_vertex}, {recoloured_vertex_weight}] ({greater_colour} -> {lesser_colour})\n')
-
     return solution
 
 def random_neighbour(graph,s,k):
@@ -118,38 +114,79 @@ def random_neighbour(graph,s,k):
     if k == 2:
         return random_neighbour1n2(graph,s,True)
     if k == 3:
-        return 2
+        return random_neighbour3(graph,s)
     if k == 4:
-        return 3
+        return random_neighbour4(graph,s)
     if k == 5:
         return random_neighbour5(graph,s)
         
-def generate_random_colour(graph,solution,partitions):
+def get_colours_to_swap(graph,solution,partitions):
     i = random.randrange(0,floor((graph.colours/partitions)))
-    if(i==graph.colours):
-        i-=1
+    if(i==graph.colours): i-=1 #acho que não precisa
 
-    sorted_colours = sorted(solution.colour_weights, key = lambda x: x[1], reverse=True)
+    sorted_colours = get_colors_by_weight(solution)
     greater_colour = sorted_colours[0][0]
     lesser_colour = sorted_colours[-i][0]
     new_solution = copy.deepcopy(solution)
 
-    return(greater_colour,lesser_colour,new_solution)
+    return(greater_colour, lesser_colour, new_solution)
+
+def get_colors_by_weight(solution):
+    return sorted(solution.colour_weights, key = lambda x: x[1], reverse=True)
 
 # Tranfers the heaviest/a random vertex from the heaviest colour to a random non-heaviest colour.
 def random_neighbour1n2(graph, solution, randomBalance):
-    greater_colour,lesser_colour,new_solution = generate_random_colour(graph,solution,PARTITIONS)
-    balance_colours(graph,new_solution,greater_colour,lesser_colour, randomBalance)
-    print(solution.evaluate(graph), new_solution.evaluate(graph))
+    greater_colour, lesser_colour, new_solution = get_colours_to_swap(graph,solution,PARTITIONS)
+    balance_colours(graph,new_solution, greater_colour, lesser_colour, randomBalance)
     return new_solution
 
-# Transfers enough vertexes from the heaviest colour to a random colour to make the heaviest colour not be the heaviest anymore
+# Transfers enough vertexes from the heaviest colour to random colours to make the heaviest colour not be the heaviest anymore
 def random_neighbour3(graph, solution):
-    greater_colour,lesser_colour,new_solution = generate_random_colour(graph,solution,1)
-    while(new_solution.colour_weights)
-    print(solution.evaluate(graph), new_solution.evaluate(graph))
+    sorted_colours = sorted(solution.colour_weights, key = lambda x: x[1], reverse=True)
+    greater_colour = sorted_colours[0][0]
+    greater_colour_weight = sorted_colours[0][1]
+
+    snd_greater_colour = sorted_colours[1][0]
+    snd_greater_colour_weight = sorted_colours[1][1]
+    new_solution = copy.deepcopy(solution)
+
+    while(greater_colour_weight > snd_greater_colour_weight):
+        i = random.randrange(2,(graph.colours))
+        lesser_colour = sorted_colours[i][0]
+
+        greater_vertexes = new_solution.vertexes_by_colour[greater_colour]
+        recoloured_vertex = greater_vertexes[random.randrange(0,len(greater_vertexes))]
+        recoloured_vertex_weight = graph.vertexes[recoloured_vertex].weight
+
+        new_solution.modify_colour(recoloured_vertex,recoloured_vertex_weight,lesser_colour)
+
+        greater_colour_weight = new_solution.colour_weights[greater_colour][1]
+        snd_greater_colour_weight = new_solution.colour_weights[snd_greater_colour][1]
+
     return new_solution
 
+# Transfers enough vertexes from the heaviest colour to a random colour to make them have a similar weight
+def random_neighbour4(graph, solution):
+    sorted_colours = sorted(solution.colour_weights, key = lambda x: x[1], reverse=True)
+    greater_colour = sorted_colours[0][0]
+    greater_colour_weight = sorted_colours[0][1]
+
+    i = random.randrange(1,(graph.colours))
+    lesser_colour = sorted_colours[i][0]
+    lesser_colour_weight = sorted_colours[i][1]
+    new_solution = copy.deepcopy(solution)
+
+    while(greater_colour_weight > lesser_colour_weight):
+        greater_vertexes = new_solution.vertexes_by_colour[greater_colour]
+        recoloured_vertex = greater_vertexes[random.randrange(0,len(greater_vertexes))]
+        recoloured_vertex_weight = graph.vertexes[recoloured_vertex].weight
+
+        new_solution.modify_colour(recoloured_vertex,recoloured_vertex_weight,lesser_colour)
+
+        greater_colour_weight = new_solution.colour_weights[greater_colour][1]
+        lesser_colour_weight = new_solution.colour_weights[lesser_colour][1]
+
+    return new_solution
 
 # The conflict correction neighbourhood - if the algorithm got to this one, it means there is a need to lessen the number of conflicts
 # Changes a random vertex to the colour that would give it the least number of conflicts
@@ -158,14 +195,28 @@ def random_neighbour5(graph, solution):
 
     new_solution = copy.deepcopy(solution)
     conflicts = graph.vertexes[v].check_conflicts(new_solution.colouring,graph.colours)
-    new_solution.modify_colour(v,graph.vertexes[v].weight,min(zip(conflicts, range(len(conflicts))))[1])
-    print(f'[{v}, {graph.vertexes[v].weight}] ({solution.colouring[v]} -> {new_solution.colouring[v]})\n')
-    print(solution.evaluate(graph), new_solution.evaluate(graph))
+    new_solution.modify_colour(v,graph.vertexes[v].weight, min(zip(conflicts, range(len(conflicts))))[1])
     return new_solution
 
 # TODO
-def local_search(k,solution,graph):
-    i = 0
+def local_search(k, solution, graph): 
+    best_solution = copy.deepcopy(solution)
+    found_best = True
+    while(found_best):
+        greater_colour = get_colors_by_weight(best_solution)[0][0]
+        greater_vertexes = best_solution.vertexes_by_colour[greater_colour]
+        j = 0
+        found_best = False
+        while j < graph.colours and not found_best: # N(s)
+            new_solution = copy.deepcopy(best_solution)
+            for v in greater_vertexes:
+                new_solution.modify_colour(v,graph.vertexes[v].weight, j)
+                if(new_solution.evaluate(graph) < best_solution.evaluate(graph)):
+                    best_solution = copy.deepcopy(new_solution)
+                    found_best = True
+                    break
+            j+=1
+    return best_solution
 
 def VNS(graph):
     start_time = time.time()
@@ -174,17 +225,15 @@ def VNS(graph):
     
     iterations_result = []
 
-    while not time_to_stop(time.time()-start_time,iterations):
+    while not time_to_stop(time.time() - start_time,iterations):
         k = 1
         while k <= 4:
             s1 = random_neighbour(graph,s,k)
-            if s1 != -1:
-                s2 = local_search(k,s1,graph)
-                if s2.evaluate(graph.number_of_conflicts(s2.colouring))<s.evaluate(graph.number_of_conflicts(s.colouring)):
-                    s = s2
-                    k = 1
-                else:
-                    k = k+1
+            s2 = local_search(k,s1,graph)
+            if s2.evaluate(graph)<s.evaluate(graph):
+                print(s2.evaluate(graph))
+                s = s2
+                k = 1
             else:
                 k = k+1
         iterations+=1
@@ -200,8 +249,8 @@ def VNS(graph):
     return s
 
 #D:\\Documents\\workspace\\git\\bgc_vns\\
-g = read_file("D:\\Documents\\workspace\\git\\bgc_vns\instances\\cmb01")
+g = read_file("D:\\Documents\\workspace\\git\\bgc_vns\instances\\cmb05")
 solution = initial_solution(g)
-# VNS(g)
+VNS(g)
 
 
