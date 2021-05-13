@@ -7,13 +7,14 @@ from input_output import *
 from IPython.display import HTML
 import matplotlib.pyplot as plt
 
-SEED = 21938273
-random.seed(SEED)
-CONFLICT_WEIGHT = 10000
-MAX_ITERATIONS = 1000
-MAX_TIME = 3600
-PARTITIONS = 4
-INSTANCE = 'cmb01'
+# Standard values for the parameters
+# seed = 21938273
+# conflict_weight = 10000
+# max_iterations = 1000
+# max_time = 1800
+# partitions = 4
+
+out_file,in_file,seed,conflict_weight,max_iterations,max_time,partitions = get_input(sys.argv)
 
 class Solution():
     def __init__(self, colouring, graph):
@@ -39,7 +40,7 @@ class Solution():
         conflicts = graph.number_of_conflicts(self.colouring)
         WEIGHT_INDEX_TUPLE = 1
         max_colour_weight = sorted(self.colour_weights, key = lambda x: x[1], reverse=True)[0][WEIGHT_INDEX_TUPLE]
-        return max_colour_weight + conflicts * CONFLICT_WEIGHT
+        return max_colour_weight + conflicts * conflict_weight
 
     def modify_colour(self,vertex,weight,new_colour):
         if vertex in self.colouring:    
@@ -87,7 +88,7 @@ def initial_solution(graph):
     return current_solution
 
 def time_to_stop(time,iterations):
-    return (time >= MAX_TIME or iterations > MAX_ITERATIONS)
+    return (time >= max_time or iterations > max_iterations)
 
 #SOLUTION MUST BE DEEP COPY
 def balance_colours(graph, solution, greater_colour, lesser_colour, is_random):
@@ -137,7 +138,7 @@ def get_colors_by_weight(solution):
 
 # Tranfers the heaviest/a random vertex from the heaviest colour to a random non-heaviest colour.
 def random_neighbour1n2(graph, solution, randomBalance):
-    greater_colour, lesser_colour, new_solution = get_colours_to_swap(graph,solution,PARTITIONS)
+    greater_colour, lesser_colour, new_solution = get_colours_to_swap(graph,solution,partitions)
     balance_colours(graph,new_solution, greater_colour, lesser_colour, randomBalance)
     return new_solution
 
@@ -193,14 +194,11 @@ def random_neighbour4(graph, solution):
 # Changes a random vertex to the colour that would give it the least number of conflicts
 def random_neighbour5(graph, solution):
     new_solution = copy.deepcopy(solution)
-
-    #for i in range(0, 9):
     v = random.randrange(0,floor(len(graph.vertexes)-1))
     conflicts = graph.vertexes[v].check_conflicts(new_solution.colouring,graph.colours)
     new_solution.modify_colour(v,graph.vertexes[v].weight, min(zip(conflicts, range(len(conflicts))))[1])
     return new_solution
 
-# TODO
 def local_search(k, solution, graph): 
     best_solution = copy.deepcopy(solution)
     found_best = True
@@ -220,7 +218,9 @@ def local_search(k, solution, graph):
             j+=1
     return best_solution
 
-def VNS(graph):
+def VNS(graph,out_file):
+    f = open(out_file, "w")
+
     start_time = time.time()
     current_time = 0
     s = initial_solution(graph)
@@ -234,8 +234,6 @@ def VNS(graph):
             s1 = random_neighbour(graph,s,k)
             s2 = local_search(k,s1,graph)
             if s2.evaluate(graph)<s.evaluate(graph):
-                #TODO delete this print
-                print(s2.evaluate(graph))
                 s = copy.deepcopy(s2)
                 k = 1
             else:
@@ -243,22 +241,28 @@ def VNS(graph):
             iterations+=1
             iterations_result.append(s.evaluate(graph))
             current_time = time.time()-start_time
-            print(current_time)
 
-    print(s.evaluate(graph))
+    f.write(f"FINAL SOLUTION: {s.evaluate(graph)} - # OF CONFLICTS: {graph.number_of_conflicts(s.colouring)}")
+    f.write(f"ITERATIONS: {iterations} - TIME: {current_time} seconds - ")
+    f.write(f"SEED: {seed} - CONFLICT_WEIGHT: {conflict_weight} - MAX # OF ITERATIONS: {max_iterations}")
+    f.write(f"MAX TIME: {max_time} seconds - # OF PARTITIONS: {partitions}")
 
     plt.figure(figsize=(10, 6))     
     plt.scatter(list(range(0, iterations)), iterations_result)
     plt.xlabel('Iterations')
     plt.ylabel('Solution')
-    plt.title(f'{INSTANCE} - SEED: {SEED} - TIME: {current_time}')
+    plt.title(f'cmbXX - SEED: {seed} - TIME: {current_time}')
     plt.show()
 
     return s
 
-#D:\\Documents\\workspace\\git\\bgc_vns\\
-g = read_file(sys.argc[1])
-solution = initial_solution(g)
-VNS(g)
+def main():
+    random.seed(seed)
+    graph = read_file(in_file)
+    VNS(graph,out_file)
+
+if __name__ == "__main__":
+	main()
+
 
 
