@@ -242,10 +242,10 @@ def VNS(graph,out_file):
             iterations_result.append(s.evaluate(graph))
             current_time = time.time()-start_time
 
-    f.write(f"FINAL SOLUTION: {s.evaluate(graph)} - # OF CONFLICTS: {graph.number_of_conflicts(s.colouring)}")
-    f.write(f"ITERATIONS: {iterations} - TIME: {current_time} seconds - ")
-    f.write(f"SEED: {seed} - CONFLICT_WEIGHT: {conflict_weight} - MAX # OF ITERATIONS: {max_iterations}")
-    f.write(f"MAX TIME: {max_time} seconds - # OF PARTITIONS: {partitions}")
+    f.write(f"FINAL SOLUTION: {s.evaluate(graph)}\n# OF CONFLICTS: {graph.number_of_conflicts(s.colouring)}\n")
+    f.write(f"ITERATIONS: {iterations}\nTIME: {current_time} seconds\n")
+    f.write(f"SEED: {seed}\nCONFLICT_WEIGHT: {conflict_weight}\nMAX # OF ITERATIONS: {max_iterations}")
+    f.write(f"MAX TIME: {max_time} seconds\n# OF PARTITIONS: {partitions}")
 
     plt.figure(figsize=(10, 6))     
     plt.scatter(list(range(0, iterations)), iterations_result)
