@@ -1,5 +1,5 @@
 from math import *
-from sys import version
+import sys
 import time
 import operator
 import random
@@ -233,6 +233,7 @@ def VNS(graph):
             s1 = random_neighbour(graph,s,k)
             s2 = local_search(k,s1,graph)
             if s2.evaluate(graph)<s.evaluate(graph):
+                #TODO delete this print
                 print(s2.evaluate(graph))
                 s = copy.deepcopy(s2)
                 k = 1
@@ -240,6 +241,8 @@ def VNS(graph):
                 k = k+1
             iterations+=1
             iterations_result.append(s.evaluate(graph))
+
+    print(s.evaluate(graph))
 
     plt.figure(figsize=(10, 6))     
     plt.scatter(list(range(0, iterations)), iterations_result)
@@ -251,7 +254,7 @@ def VNS(graph):
     return s
 
 #D:\\Documents\\workspace\\git\\bgc_vns\\
-g = read_file(f"..\instances\\{INSTANCE}")
+g = read_file(sys.argc[1])
 solution = initial_solution(g)
 VNS(g)
 
