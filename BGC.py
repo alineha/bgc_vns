@@ -251,7 +251,7 @@ def VNS(graph,out_file):
     plt.scatter(list(range(0, iterations)), iterations_result)
     plt.xlabel('Iterations')
     plt.ylabel('Solution')
-    plt.title(f'cmbXX - SEED: {seed} - TIME: {current_time}')
+    plt.title(f'{in_file[-5:]} - SEED: {seed} - TIME: {current_time}')
     plt.show()
 
     return s
