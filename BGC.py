@@ -244,7 +244,7 @@ def VNS(graph,out_file):
 
     f.write(f"INSTANCE: {in_file[-5:]}\nFINAL SOLUTION: {s.evaluate(graph)}\n# OF CONFLICTS: {graph.number_of_conflicts(s.colouring)}\n")
     f.write(f"ITERATIONS: {iterations}\nTIME: {current_time} seconds\n")
-    f.write(f"SEED: {seed}\nCONFLICT_WEIGHT: {conflict_weight}\nMAX # OF ITERATIONS: {max_iterations}")
+    f.write(f"SEED: {seed}\nCONFLICT_WEIGHT: {conflict_weight}\nMAX # OF ITERATIONS: {max_iterations}\n")
     f.write(f"MAX TIME: {max_time} seconds\n# OF PARTITIONS: {partitions}")
 
     plt.figure(figsize=(10, 6))     
