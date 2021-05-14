@@ -227,7 +227,7 @@ def VNS(graph,out_file):
     iterations = 0
     
     iterations_result = []
-    print(in_file[-5:])
+    print("Running VNS...")
     while not time_to_stop(current_time,iterations):
         k = 1
         while k <= 4 and not time_to_stop(current_time,iterations):
@@ -241,6 +241,8 @@ def VNS(graph,out_file):
             iterations+=1
             iterations_result.append(s.evaluate(graph))
             current_time = time.time()-start_time
+
+    print("Done")
 
     f.write(f"INSTANCE: {in_file[-5:]}\nFINAL SOLUTION: {s.evaluate(graph)}\n# OF CONFLICTS: {graph.number_of_conflicts(s.colouring)}\n")
     f.write(f"ITERATIONS: {iterations}\nTIME: {current_time} seconds\n")
